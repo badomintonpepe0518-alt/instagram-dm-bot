@@ -1,0 +1,11 @@
+data/ig_cookies.json
+data/dm_users.json
+data/vivea_followers.json
+data/tunnel_url.txt
+data/*.db
+logs/
+__pycache__/
+*.pyc
+cloudflared
+output/
+.claude/

@@ -1,0 +1,47 @@
+name: Auto Collect Candidates
+
+on:
+  schedule:
+    - cron: '17 */2 * * *'  # 2時間ごと
+  workflow_dispatch: {}  # 手動実行も可能
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Create data dirs
+        run: mkdir -p data logs
+
+      - name: Write cookies from secret
+        run: echo '${{ secrets.IG_COOKIES }}' > data/ig_cookies.json
+
+      - name: Write vivea followers from cache
+        run: |
+          if [ -f data/vivea_followers.json ]; then
+            echo "vivea cache exists"
+          else
+            echo "[]" > data/vivea_followers.json
+          fi
+
+      - name: Run auto_collect
+        run: python auto_collect.py
+
+      - name: Show log
+        run: cat logs/auto_collect.log || true
+
+      - name: Commit updated DB
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/instagram_dm.db
+          git diff --cached --quiet || git commit -m "auto: collect candidates $(date +%Y-%m-%d_%H:%M)"
+          git push
