@@ -203,9 +203,7 @@ body{{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;b
 function da(aid,action,el){{
   var c=el.closest('.c');
   c.classList.add('hide');
-  fetch('http://localhost:8502/api/action?action='+action+'&aid='+aid).catch(function(){{
-    window.top.location.href='?action='+action+'&aid='+aid;
-  }});
+  window.top.location.href='?action='+action+'&aid='+aid;
   var rc=document.getElementById('rc');
   rc.textContent=parseInt(rc.textContent)-1;
   if(action==='sent'){{var sc=document.getElementById('sc');sc.textContent=parseInt(sc.textContent)+1;}}
