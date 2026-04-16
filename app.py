@@ -88,12 +88,26 @@ with tab_today:
     """, unsafe_allow_html=True)
 
     # DM文面コピペ欄
+    _DEFAULT_DM = """【予算10万円、舞台はパリ】
+
+初めまして😌
+私たちは、Vivéaがプロデュースする 私服のカジュアルフォトサービス
+"Chuly（チュリー）"と申します📸
+
+・パリの思い出を自然な形で残したい
+・観光の合間に、無理なく撮影したい
+・ご予算を抑えつつおしゃれに撮影をしたい
+
+そんな方に向けて、 おふたりの特別なご旅行を "おふたりらしい形"で残すことを 大切にしています🕊️
+
+予算は10万円からご案内可能です🤍
+
+また、Chulyをディレクションしている「Vivéa（ヴィヴェア）」では、 パリを舞台にした前撮り撮影を中心に、 ウェディングムービーやオリジナルドレスのプランもご用意しております👗🎞️
+https://www.instagram.com/vivea.paris___
+
+ぜひパリでお会いできたら嬉しいです🇫🇷"""
     template = get_active_template()
-    if template:
-        with st.expander("✉️ DM文面（タップしてコピー）", expanded=False):
-            st.code(template["body"], language=None)
-    else:
-        st.warning("先に「テンプレート」タブでDM文面を登録してください。")
+    _dm_body = template["body"] if template else _DEFAULT_DM
 
     st.caption("精度スコア順に上位70件を表示。スコアリング済み。")
 
@@ -196,7 +210,21 @@ body{{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;b
 .bo{{background:linear-gradient(135deg,#c9a96e,#e8c88a)}}
 .bs{{background:#27ae60}}
 .bk{{background:#95a5a6}}
+.dm-box{{background:#f8f6f3;border:1px solid #e8e0d4;border-radius:12px;margin-bottom:12px;overflow:hidden}}
+.dm-header{{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;cursor:pointer}}
+.dm-header h3{{font-size:14px;color:#c9a96e;margin:0}}
+.dm-toggle{{font-size:12px;color:#999}}
+.dm-body{{display:none;padding:0 14px 12px;font-size:13px;color:#333;white-space:pre-wrap;line-height:1.6}}
+.dm-body.show{{display:block}}
+.copy-btn{{display:block;margin:8px auto 0;background:linear-gradient(135deg,#c9a96e,#e8c88a);color:#fff;border:none;border-radius:20px;padding:10px 24px;font-size:14px;font-weight:600;cursor:pointer}}
+.copy-btn.done{{background:#27ae60}}
 </style></head><body>
+<div class="dm-box">
+<div class="dm-header" onclick="var b=this.nextElementSibling;b.classList.toggle('show');this.querySelector('.dm-toggle').textContent=b.classList.contains('show')?'▲':'▼'">
+<h3>✉️ DM文面</h3><span class="dm-toggle">▼</span></div>
+<div class="dm-body" id="dmt">{_dm_body.replace(chr(10),"<br>")}<br>
+<button class="copy-btn" onclick="var t=document.getElementById('dmt').innerText;navigator.clipboard.writeText(t).then(function(){{var b=event.target;b.textContent='✅ コピーしました！';b.classList.add('done');setTimeout(function(){{b.textContent='📋 DM文面をコピー';b.classList.remove('done')}},2000)}})">📋 DM文面をコピー</button>
+</div></div>
 <div class="st">残 <span id="rc">{len(_top)}</span>件 ／ 今日送信済 <span id="sc">{_sent_today}</span>件 ／ スコア {_top[-1]["score"]}〜{_top[0]["score"]}点</div>
 {"".join(_cards_items)}
 <script>
