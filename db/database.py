@@ -7,6 +7,10 @@ from typing import Optional
 
 DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "instagram_dm.db")
 
+# Streamlit Cloud: DBは揮発性なので毎回CSVから再構築する
+IS_CLOUD = os.environ.get("STREAMLIT_SERVER_HEADLESS") == "true" or \
+           os.path.exists("/mount/src")
+
 
 def get_connection():
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
@@ -15,11 +19,13 @@ def get_connection():
     try:
         conn.execute("PRAGMA journal_mode=WAL")
     except Exception:
-        pass  # WAL not supported on some cloud environments
+        pass
     return conn
 
 
 def init_db():
+    if IS_CLOUD and os.path.exists(DB_PATH):
+        os.remove(DB_PATH)  # クラウドでは毎回CSVから再構築
     conn = get_connection()
     conn.executescript("""
         CREATE TABLE IF NOT EXISTS accounts (
