@@ -77,101 +77,64 @@ def _safe_float(v):
     try: return float(v)
     except (ValueError, TypeError): return 0.0
 
-def _import_csvs_if_empty():
-    """DBが空のとき（クラウド初回起動時）CSVからデータを復元する"""
-    import csv
-    conn = get_connection()
-    count = conn.execute("SELECT COUNT(*) FROM accounts").fetchone()[0]
+def _import_csv_table(conn, data_dir, table, csv_name, columns, converter):
+    """テーブルが空ならCSVからインポート"""
+    count = conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
     if count > 0:
-        conn.close()
         return
+    csv_path = os.path.join(data_dir, csv_name)
+    if not os.path.exists(csv_path):
+        return
+    import csv
+    with open(csv_path, "r", encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            try:
+                placeholders = ",".join(["?"] * len(columns))
+                conn.execute(
+                    f"INSERT OR IGNORE INTO {table} ({','.join(columns)}) VALUES ({placeholders})",
+                    converter(row),
+                )
+            except Exception:
+                pass
 
+def _import_csvs_if_empty():
+    """各テーブルが空のとき（クラウド初回起動時）CSVからデータを復元する"""
+    conn = get_connection()
     data_dir = os.path.dirname(DB_PATH)
 
-    # accounts.csv
-    csv_path = os.path.join(data_dir, "accounts.csv")
-    if os.path.exists(csv_path):
-        with open(csv_path, "r", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                try:
-                    conn.execute(
-                        """INSERT OR IGNORE INTO accounts
-                           (id,username,status,sent_at,created_at,score,followers,posts,bio,full_name,is_business,enriched_at,score_reason)
-                           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-                        (
-                            _safe_int(row.get("id")),
-                            row["username"],
-                            row.get("status", "pending"),
-                            row.get("sent_at") or None,
-                            row.get("created_at") or None,
-                            _safe_int(row.get("score")),
-                            _safe_int(row.get("followers")),
-                            _safe_int(row.get("posts")),
-                            row.get("bio") or None,
-                            row.get("full_name") or None,
-                            _safe_int(row.get("is_business")),
-                            row.get("enriched_at") or None,
-                            row.get("score_reason") or None,
-                        ),
-                    )
-                except Exception:
-                    pass
+    _import_csv_table(conn, data_dir, "accounts", "accounts.csv",
+        ["id","username","status","sent_at","created_at","score","followers","posts","bio","full_name","is_business","enriched_at","score_reason"],
+        lambda r: (
+            _safe_int(r.get("id")), r["username"], r.get("status","pending"),
+            r.get("sent_at") or None, r.get("created_at") or None,
+            _safe_int(r.get("score")), _safe_int(r.get("followers")), _safe_int(r.get("posts")),
+            r.get("bio") or None, r.get("full_name") or None, _safe_int(r.get("is_business")),
+            r.get("enriched_at") or None, r.get("score_reason") or None,
+        ))
 
-    # templates.csv
-    csv_path = os.path.join(data_dir, "templates.csv")
-    if os.path.exists(csv_path):
-        with open(csv_path, "r", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                try:
-                    conn.execute(
-                        "INSERT OR IGNORE INTO templates (id,name,body,is_active,created_at) VALUES (?,?,?,?,?)",
-                        (_safe_int(row.get("id")), row["name"], row["body"],
-                         _safe_int(row.get("is_active")) or 1, row.get("created_at")),
-                    )
-                except Exception:
-                    pass
+    _import_csv_table(conn, data_dir, "templates", "templates.csv",
+        ["id","name","body","is_active","created_at"],
+        lambda r: (
+            _safe_int(r.get("id")), r["name"], r["body"],
+            _safe_int(r.get("is_active")) or 1, r.get("created_at"),
+        ))
 
-    # engagements.csv
-    csv_path = os.path.join(data_dir, "engagements.csv")
-    if os.path.exists(csv_path):
-        with open(csv_path, "r", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                try:
-                    conn.execute(
-                        "INSERT OR IGNORE INTO engagements (id,username,type,detail,detected_at) VALUES (?,?,?,?,?)",
-                        (_safe_int(row.get("id")), row["username"], row["type"],
-                         row.get("detail") or None, row.get("detected_at")),
-                    )
-                except Exception:
-                    pass
+    _import_csv_table(conn, data_dir, "engagements", "engagements.csv",
+        ["id","username","type","detail","detected_at"],
+        lambda r: (
+            _safe_int(r.get("id")), r["username"], r["type"],
+            r.get("detail") or None, r.get("detected_at"),
+        ))
 
-    # learning_log.csv
-    csv_path = os.path.join(data_dir, "learning_log.csv")
-    if os.path.exists(csv_path):
-        with open(csv_path, "r", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                try:
-                    conn.execute(
-                        """INSERT OR IGNORE INTO learning_log
-                           (id,date,summary,insights,follow_back_rate,like_rate,total_sent,total_follow_back,total_like,created_at)
-                           VALUES (?,?,?,?,?,?,?,?,?,?)""",
-                        (
-                            _safe_int(row.get("id")), row["date"], row["summary"],
-                            row.get("insights") or None,
-                            _safe_float(row.get("follow_back_rate")),
-                            _safe_float(row.get("like_rate")),
-                            _safe_int(row.get("total_sent")),
-                            _safe_int(row.get("total_follow_back")),
-                            _safe_int(row.get("total_like")),
-                            row.get("created_at"),
-                        ),
-                    )
-                except Exception:
-                    pass
+    _import_csv_table(conn, data_dir, "learning_log", "learning_log.csv",
+        ["id","date","summary","insights","follow_back_rate","like_rate","total_sent","total_follow_back","total_like","created_at"],
+        lambda r: (
+            _safe_int(r.get("id")), r["date"], r["summary"],
+            r.get("insights") or None,
+            _safe_float(r.get("follow_back_rate")), _safe_float(r.get("like_rate")),
+            _safe_int(r.get("total_sent")), _safe_int(r.get("total_follow_back")),
+            _safe_int(r.get("total_like")), r.get("created_at"),
+        ))
 
     conn.commit()
     conn.close()
