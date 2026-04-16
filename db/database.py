@@ -69,6 +69,14 @@ def init_db():
     _import_csvs_if_empty()
 
 
+def _safe_int(v):
+    try: return int(v)
+    except (ValueError, TypeError): return None
+
+def _safe_float(v):
+    try: return float(v)
+    except (ValueError, TypeError): return 0.0
+
 def _import_csvs_if_empty():
     """DBが空のとき（クラウド初回起動時）CSVからデータを復元する"""
     import csv
@@ -92,17 +100,17 @@ def _import_csvs_if_empty():
                            (id,username,status,sent_at,created_at,score,followers,posts,bio,full_name,is_business,enriched_at,score_reason)
                            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                         (
-                            int(row["id"]) if row.get("id") else None,
+                            _safe_int(row.get("id")),
                             row["username"],
                             row.get("status", "pending"),
                             row.get("sent_at") or None,
                             row.get("created_at") or None,
-                            int(row["score"]) if row.get("score") else None,
-                            int(row["followers"]) if row.get("followers") else None,
-                            int(row["posts"]) if row.get("posts") else None,
+                            _safe_int(row.get("score")),
+                            _safe_int(row.get("followers")),
+                            _safe_int(row.get("posts")),
                             row.get("bio") or None,
                             row.get("full_name") or None,
-                            int(row["is_business"]) if row.get("is_business") else None,
+                            _safe_int(row.get("is_business")),
                             row.get("enriched_at") or None,
                             row.get("score_reason") or None,
                         ),
@@ -119,8 +127,8 @@ def _import_csvs_if_empty():
                 try:
                     conn.execute(
                         "INSERT OR IGNORE INTO templates (id,name,body,is_active,created_at) VALUES (?,?,?,?,?)",
-                        (int(row["id"]), row["name"], row["body"],
-                         int(row.get("is_active", 1)), row.get("created_at")),
+                        (_safe_int(row.get("id")), row["name"], row["body"],
+                         _safe_int(row.get("is_active")) or 1, row.get("created_at")),
                     )
                 except Exception:
                     pass
@@ -134,7 +142,7 @@ def _import_csvs_if_empty():
                 try:
                     conn.execute(
                         "INSERT OR IGNORE INTO engagements (id,username,type,detail,detected_at) VALUES (?,?,?,?,?)",
-                        (int(row["id"]), row["username"], row["type"],
+                        (_safe_int(row.get("id")), row["username"], row["type"],
                          row.get("detail") or None, row.get("detected_at")),
                     )
                 except Exception:
@@ -152,13 +160,13 @@ def _import_csvs_if_empty():
                            (id,date,summary,insights,follow_back_rate,like_rate,total_sent,total_follow_back,total_like,created_at)
                            VALUES (?,?,?,?,?,?,?,?,?,?)""",
                         (
-                            int(row["id"]), row["date"], row["summary"],
+                            _safe_int(row.get("id")), row["date"], row["summary"],
                             row.get("insights") or None,
-                            float(row.get("follow_back_rate", 0)),
-                            float(row.get("like_rate", 0)),
-                            int(row.get("total_sent", 0)),
-                            int(row.get("total_follow_back", 0)),
-                            int(row.get("total_like", 0)),
+                            _safe_float(row.get("follow_back_rate")),
+                            _safe_float(row.get("like_rate")),
+                            _safe_int(row.get("total_sent")),
+                            _safe_int(row.get("total_follow_back")),
+                            _safe_int(row.get("total_like")),
                             row.get("created_at"),
                         ),
                     )
