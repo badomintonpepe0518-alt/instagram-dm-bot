@@ -169,7 +169,7 @@ with tab_today:
                 f'<div class="fn">{fn}</div>'
                 f'</div></div>'
                 f'<div class="btns">'
-                f'<a class="btn bo" href="https://www.instagram.com/{u}/" target="_top">開く</a>'
+                f'<a class="btn bo" href="#" onclick="return oi(\'{u}\')">開く</a>'
                 f'<a class="btn bs" href="#" onclick="return da({acc_id},\'sent\',this)">✅ 済</a>'
                 f'<a class="btn bk" href="#" onclick="return da({acc_id},\'skipped\',this)">❌ 除外</a>'
                 f'</div></div>'
@@ -200,6 +200,15 @@ body{{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;b
 <div class="st">残 <span id="rc">{len(_top)}</span>件 ／ 今日送信済 <span id="sc">{_sent_today}</span>件 ／ スコア {_top[-1]["score"]}〜{_top[0]["score"]}点</div>
 {"".join(_cards_items)}
 <script>
+function oi(u){{
+  var app='instagram://user?username='+u;
+  var web='https://www.instagram.com/'+u+'/';
+  var w=window.open(app,'_blank');
+  setTimeout(function(){{
+    try{{if(!w||w.closed)window.top.location.href=web;}}catch(e){{window.top.location.href=web;}}
+  }},1500);
+  return false;
+}}
 function da(aid,action,el){{
   var c=el.closest('.c');
   c.classList.add('hide');
