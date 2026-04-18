@@ -5,11 +5,15 @@ import os
 from datetime import datetime
 from typing import Optional
 
-DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "instagram_dm.db")
-
 # Streamlit Cloud: DBは揮発性なので毎回CSVから再構築する
 IS_CLOUD = os.environ.get("STREAMLIT_SERVER_HEADLESS") == "true" or \
            os.path.exists("/mount/src")
+
+# クラウドでは/mount/srcが読み取り専用の可能性があるので/tmpに配置
+if IS_CLOUD:
+    DB_PATH = "/tmp/instagram_dm.db"
+else:
+    DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "instagram_dm.db")
 
 
 def get_connection():
@@ -108,7 +112,8 @@ def _import_csv_table(conn, data_dir, table, csv_name, columns, converter):
 def _import_csvs_if_empty():
     """各テーブルが空のとき（クラウド初回起動時）CSVからデータを復元する"""
     conn = get_connection()
-    data_dir = os.path.dirname(DB_PATH)
+    # CSVはリポジトリの data/ 配下にある（クラウドでも同じ）
+    data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
 
     _import_csv_table(conn, data_dir, "accounts", "accounts.csv",
         ["id","username","status","sent_at","created_at","score","followers","posts","bio","full_name","is_business","enriched_at","score_reason"],

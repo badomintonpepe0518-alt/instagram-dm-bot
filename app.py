@@ -128,7 +128,8 @@ https://www.instagram.com/vivea.paris___
         st.rerun()
 
     import sqlite3 as _sql
-    _db = _sql.connect(os.path.join(os.path.dirname(__file__), 'data', 'instagram_dm.db'))
+    from db.database import DB_PATH as _DB_PATH
+    _db = _sql.connect(_DB_PATH)
     _db.row_factory = _sql.Row
 
     # DM済みユーザーをロードしてリアルタイム除外
