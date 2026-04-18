@@ -23,9 +23,16 @@ def get_connection():
     return conn
 
 
+# セッション内で一度だけCSV再構築するためのフラグ
+_INITIALIZED = False
+
+
 def init_db():
-    if IS_CLOUD and os.path.exists(DB_PATH):
-        os.remove(DB_PATH)  # クラウドでは毎回CSVから再構築
+    global _INITIALIZED
+    # クラウドでは起動時のみCSVから再構築（再実行時はDBを保持）
+    if IS_CLOUD and not _INITIALIZED and os.path.exists(DB_PATH):
+        os.remove(DB_PATH)
+    _INITIALIZED = True
     conn = get_connection()
     conn.executescript("""
         CREATE TABLE IF NOT EXISTS accounts (
