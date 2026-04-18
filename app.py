@@ -222,8 +222,9 @@ body{{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;b
 <div class="dm-box">
 <div class="dm-header" onclick="var b=this.nextElementSibling;b.classList.toggle('show');this.querySelector('.dm-toggle').textContent=b.classList.contains('show')?'▲':'▼'">
 <h3>✉️ DM文面</h3><span class="dm-toggle">▼</span></div>
-<div class="dm-body" id="dmt">{_dm_body.replace(chr(10),"<br>")}<br>
-<button class="copy-btn" onclick="var t=document.getElementById('dmt').innerText;navigator.clipboard.writeText(t).then(function(){{var b=event.target;b.textContent='✅ コピーしました！';b.classList.add('done');setTimeout(function(){{b.textContent='📋 DM文面をコピー';b.classList.remove('done')}},2000)}})">📋 DM文面をコピー</button>
+<div class="dm-body"><div id="dmt">{_dm_body.replace(chr(10),"<br>")}</div>
+<textarea id="dmtxt" style="position:absolute;left:-9999px" aria-hidden="true">{_dm_body}</textarea>
+<button class="copy-btn" onclick="var t=document.getElementById('dmtxt').value;navigator.clipboard.writeText(t).then(function(){{var b=event.target;b.textContent='✅ コピーしました！';b.classList.add('done');setTimeout(function(){{b.textContent='📋 DM文面をコピー';b.classList.remove('done')}},2000)}})">📋 DM文面をコピー</button>
 </div></div>
 <div class="st">残 <span id="rc">{len(_top)}</span>件 ／ 今日送信済 <span id="sc">{_sent_today}</span>件 ／ スコア {_top[-1]["score"]}〜{_top[0]["score"]}点</div>
 {"".join(_cards_items)}
