@@ -216,15 +216,15 @@ body{{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;b
 .dm-toggle{{font-size:12px;color:#999}}
 .dm-body{{display:none;padding:0 14px 12px;font-size:13px;color:#333;white-space:pre-wrap;line-height:1.6}}
 .dm-body.show{{display:block}}
-.copy-btn{{display:block;margin:8px auto 0;background:linear-gradient(135deg,#c9a96e,#e8c88a);color:#fff;border:none;border-radius:20px;padding:10px 24px;font-size:14px;font-weight:600;cursor:pointer}}
+.copy-btn{{display:block;width:100%;margin:0 0 8px;background:linear-gradient(135deg,#c9a96e,#e8c88a);color:#fff;border:none;border-radius:24px;padding:14px 24px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(201,169,110,0.3)}}
 .copy-btn.done{{background:#27ae60}}
 </style></head><body>
-<div class="dm-box">
-<div class="dm-header" onclick="var b=this.nextElementSibling;b.classList.toggle('show');this.querySelector('.dm-toggle').textContent=b.classList.contains('show')?'▲':'▼'">
-<h3>✉️ DM文面</h3><span class="dm-toggle">▼</span></div>
-<div class="dm-body"><div id="dmt">{_dm_body.replace(chr(10),"<br>")}</div>
 <textarea id="dmtxt" style="position:absolute;left:-9999px" aria-hidden="true">{_dm_body}</textarea>
 <button class="copy-btn" onclick="var t=document.getElementById('dmtxt').value;navigator.clipboard.writeText(t).then(function(){{var b=event.target;b.textContent='✅ コピーしました！';b.classList.add('done');setTimeout(function(){{b.textContent='📋 DM文面をコピー';b.classList.remove('done')}},2000)}})">📋 DM文面をコピー</button>
+<div class="dm-box">
+<div class="dm-header" onclick="var b=this.nextElementSibling;b.classList.toggle('show');this.querySelector('.dm-toggle').textContent=b.classList.contains('show')?'▲':'▼'">
+<h3>✉️ DM文面を確認</h3><span class="dm-toggle">▼</span></div>
+<div class="dm-body"><div id="dmt">{_dm_body.replace(chr(10),"<br>")}</div>
 </div></div>
 <div class="st">残 <span id="rc">{len(_top)}</span>件 ／ 今日送信済 <span id="sc">{_sent_today}</span>件 ／ スコア {_top[-1]["score"]}〜{_top[0]["score"]}点</div>
 {"".join(_cards_items)}

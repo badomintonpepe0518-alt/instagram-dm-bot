@@ -23,14 +23,26 @@ def get_connection():
     return conn
 
 
-# セッション内で一度だけCSV再構築するためのフラグ
 _INITIALIZED = False
+
+
+def _should_rebuild_db():
+    """DBが存在しない、またはCSVがDBより新しい場合はTrue"""
+    if not os.path.exists(DB_PATH):
+        return True
+    db_mtime = os.path.getmtime(DB_PATH)
+    data_dir = os.path.dirname(DB_PATH)
+    for csv_name in ['accounts.csv', 'templates.csv', 'engagements.csv', 'learning_log.csv']:
+        csv_path = os.path.join(data_dir, csv_name)
+        if os.path.exists(csv_path) and os.path.getmtime(csv_path) > db_mtime:
+            return True
+    return False
 
 
 def init_db():
     global _INITIALIZED
-    # クラウドでは起動時のみCSVから再構築（再実行時はDBを保持）
-    if IS_CLOUD and not _INITIALIZED and os.path.exists(DB_PATH):
+    # クラウドで起動時のみ、かつCSVが新しい場合だけ再構築
+    if IS_CLOUD and not _INITIALIZED and _should_rebuild_db() and os.path.exists(DB_PATH):
         os.remove(DB_PATH)
     _INITIALIZED = True
     conn = get_connection()
