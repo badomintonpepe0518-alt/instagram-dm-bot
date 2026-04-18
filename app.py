@@ -249,7 +249,7 @@ function da(aid,action,el){{
 }}
 </script>
 </body></html>'''
-        components.html(_html_content, height=len(_top) * 130 + 60, scrolling=True)
+        components.html(_html_content, height=len(_top) * 145 + 200, scrolling=False)
 
 
 

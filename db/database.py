@@ -23,28 +23,8 @@ def get_connection():
     return conn
 
 
-_INITIALIZED = False
-
-
-def _should_rebuild_db():
-    """DBが存在しない、またはCSVがDBより新しい場合はTrue"""
-    if not os.path.exists(DB_PATH):
-        return True
-    db_mtime = os.path.getmtime(DB_PATH)
-    data_dir = os.path.dirname(DB_PATH)
-    for csv_name in ['accounts.csv', 'templates.csv', 'engagements.csv', 'learning_log.csv']:
-        csv_path = os.path.join(data_dir, csv_name)
-        if os.path.exists(csv_path) and os.path.getmtime(csv_path) > db_mtime:
-            return True
-    return False
-
-
 def init_db():
-    global _INITIALIZED
-    # クラウドで起動時のみ、かつCSVが新しい場合だけ再構築
-    if IS_CLOUD and not _INITIALIZED and _should_rebuild_db() and os.path.exists(DB_PATH):
-        os.remove(DB_PATH)
-    _INITIALIZED = True
+    # DB削除はしない（ユーザー操作を保持）。CSVインポートは空テーブルのみ対象。
     conn = get_connection()
     conn.executescript("""
         CREATE TABLE IF NOT EXISTS accounts (
