@@ -37,3 +37,4 @@ id,username,type,detail,detected_at
 37,takumiho_2023,dm_reply,"自動検出 score=10 wed+6(2),fol_sweet+3,posts+2,url-1",2026-04-13 20:04:30
 38,y_wed26,dm_reply,"自動検出 score=15 wed+6(2),date+5,fol_sweet+3,posts+1",2026-04-14 20:04:16
 39,my_wd2026,like,写真に複数いいね（1日前・3日前通知で確認）,2026-04-17 08:10:46
+40,ohk_wd7,follow_back,"自動検出 score=8 wed+4,fol_sweet+3,posts+2,url-1",2026-04-19 20:04:21
